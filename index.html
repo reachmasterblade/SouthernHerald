@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Character set declaration for proper text display -->
+    <meta charset="UTF-8">
+    <!-- Viewport meta tag for responsive design across devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title of the webpage, displayed in browser tab -->
+    <title>Minimal News & Current Affairs</title>
+
+    <!-- Google Fonts: Playfair Display for headings, Lato for body text -->
+    <!-- These fonts are chosen to match the elegant and clean style of the example image. -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN (Content Delivery Network) -->
+    <!-- This imports the Tailwind CSS framework, which provides utility classes for styling. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* Custom CSS variables for consistent color usage throughout the site */
+        :root {
+            --color-background: #F8F8F8; /* Light background color for the overall page */
+            --color-primary-dark: #2D3748; /* Dark blue/navy for main text, headings, and buttons */
+            --color-secondary-dark: #4A5568; /* Slightly lighter dark shade for secondary text and links */
+            --color-link-hover: #2D3748; /* Dark blue for link hover state */
+            --color-button-hover: #1A202C; /* Slightly darker navy for button hover */
+            --color-footer-bg: #2D3748; /* Dark background for the footer, matching primary dark */
+            --color-footer-text: #E2E8F0; /* Light text color for the footer */
+            --color-footer-link-hover: #FFFFFF; /* White for footer link hover */
+        }
+
+        /* Basic styling for the entire body of the page */
+        body {
+            font-family: 'Lato', sans-serif; /* Sets Lato as the default font for body text */
+            background-color: var(--color-background); /* Uses the custom background color */
+            color: var(--color-primary-dark); /* Uses the custom primary dark color for default text */
+            line-height: 1.7; /* Increases line height for better readability */
+        }
+
+        /* Styling for all heading elements (h1 to h6) */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif; /* Sets Playfair Display as the font for headings */
+            color: var(--color-primary-dark); /* Uses the custom primary dark color for headings */
+        }
+
+        /* Ensures all images are responsive and don't overflow their containers */
+        img {
+            max-width: 100%; /* Makes images scale down if they are wider than their parent */
+            height: auto;    /* Maintains aspect ratio when scaling */
+        }
+
+        /* Styles for the carousel slides */
+        .carousel-item {
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+            position: absolute; /* Position absolutely to stack them */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* Ensure it fills the parent container */
+            display: flex;
+            flex-direction: column; /* Default to column for small screens */
+            visibility: hidden; /* Hidden from screen readers and interaction when inactive */
+            z-index: 1; /* Default z-index for inactive items */
+        }
+
+        /* Styles for the active carousel slide */
+        .carousel-item.active {
+            opacity: 1; /* Visible when active */
+            visibility: visible; /* Make it visible */
+            z-index: 10; /* Bring active item to the front */
+        }
+
+        /* On medium screens and up, change flex direction to row for side-by-side layout */
+        @media (min-width: 768px) {
+            .carousel-item {
+                flex-direction: row;
+            }
+        }
+
+        /* Specific styling for the navigation dots */
+        .dot {
+            height: 10px;
+            width: 10px;
+            margin: 0 4px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background-color: var(--color-primary-dark); /* Dark dot for active slide */
+        }
+
+        /* Dropdown specific styles */
+        .dropdown {
+            position: relative; /* Parent for absolute positioning of dropdown content */
+        }
+
+        .dropdown-content {
+            display: block; /* Always block, but hidden by opacity and pointer-events */
+            position: absolute;
+            background-color: #f9f9f9; /* Light background for dropdown */
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 20; /* Ensure dropdown is above other content */
+            border-radius: 0.5rem; /* Rounded corners */
+            overflow: hidden; /* Ensures content stays within rounded corners */
+            opacity: 0; /* Start hidden for smooth fade-in */
+            transform: translateY(-10px); /* Start slightly above for smooth slide-down */
+            pointer-events: none; /* Prevents interaction when hidden */
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+
+        .dropdown-content a {
+            color: var(--color-primary-dark); /* Dark text for dropdown links */
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.2s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd; /* Light hover background */
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            opacity: 1; /* Fade in */
+            transform: translateY(0); /* Slide down to original position */
+            pointer-events: all; /* Allow interaction when visible */
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Header/Navigation Bar Section -->
+    <header id="main-header" class="bg-white shadow-md py-6 px-6 md:px-10 sticky top-0 z-50 rounded-b-lg
+                                   transform transition-transform duration-300 ease-in-out">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between">
+            <!-- Logo Section -->
+            <div class="flex items-center mb-4 md:mb-0">
+                <a href="index.html" class="block">
+                    <img src="https://placehold.co/150x50/F8F8F8/2D3748?text=News+Logo" alt="News Website Logo" class="h-9 w-auto">
+                </a>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex flex-wrap justify-center md:justify-end gap-x-8 gap-y-2 text-base">
+                <!-- Dropdown for "About us" -->
+                <div class="dropdown">
+                    <a href="#" class="text-gray-700 hover:text-gray-900 transition duration-300 ease-in-out font-medium px-2 py-1 rounded-md hover:bg-gray-100">About Us &#9662;</a>
+                    <div class="dropdown-content">
+                        <a href="about.html">About Us</a>
+                        <a href="our-team.html">Our Team</a>
+                    </div>
+                </div>
+                <a href="#" class="text-gray-700 hover:text-gray-900 transition duration-300 ease-in-out font-medium">Politics</a>
+                <a href="#" class="text-gray-700 hover:text-gray-900 transition duration-300 ease-in-out font-medium">Economy</a>
+                <a href="#" class="text-gray-700 hover:text-gray-900 transition duration-300 ease-in-out font-medium">Technology</a>
+                <a href="#" class="text-gray-700 hover:text-gray-900 transition duration-300 ease-in-out font-medium">Culture</a>
+                <a href="#" class="text-gray-700 hover:text-gray-900 transition duration-300 ease-in-out font-medium">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto my-12 px-4 max-w-7xl">
+        <!-- Hero Section -->
+        <section class="text-center mb-20 px-4">
+            <h1 class="text-5xl md:text-6xl font-bold leading-tight mb-6" style="color: var(--color-primary-dark);">
+                Unveiling Truths, <br> Shaping Perspectives
+            </h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto mb-8" style="color: var(--color-secondary-dark);">
+                Explore a world of in-depth analysis, breaking news, and insightful commentary on current affairs. Stay connected with global events and access valuable resources.
+            </p>
+            <a href="#" class="inline-block py-3 px-8 rounded-full text-white font-semibold shadow-md transition duration-300 ease-in-out"
+               style="background-color: var(--color-primary-dark); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+               onmouseover="this.style.backgroundColor='var(--color-button-hover)'"
+               onmouseout="this.style.backgroundColor='var(--color-primary-dark)'">
+                Discover More
+            </a>
+        </section>
+
+        <!-- Featured Article Section (Carousel) -->
+        <section class="mb-16">
+            <h2 class="text-4xl font-bold mb-10 text-center" style="color: var(--color-primary-dark);">Top Stories</h2>
+            <div id="top-stories-carousel" class="relative w-full h-[500px] md:h-[400px] lg:h-[350px] overflow-hidden rounded-lg shadow-md">
+                <!-- Carousel Item 1 - Template content added back -->
+                <div class="carousel-item active bg-white">
+                    <div class="md:w-1/2">
+                        <img src="https://placehold.co/800x500/D1D5DB/2D3748?text=Your+Image+1" alt="Featured News Image 1" class="w-full h-full object-cover">
+                    </div>
+                    <div class="md:w-1/2 p-8 flex flex-col justify-center overflow-y-auto">
+                        <h3 class="text-3xl font-semibold mb-4" style="color: var(--color-primary-dark);">Your Top Story Title 1</h3>
+                        <p class="mb-5" style="color: var(--color-secondary-dark);">This is where you can write a compelling summary or introduction for your first top news story. Keep it concise and engaging!</p>
+                        <p class="text-sm mb-5" style="color: var(--color-secondary-dark);">Date | By Your Name</p>
+                        <a href="#" class="inline-block py-3 px-6 rounded-full text-white font-semibold shadow-md transition duration-300 ease-in-out self-start"
+                           style="background-color: var(--color-primary-dark); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+                           onmouseover="this.style.backgroundColor='var(--color-button-hover)'"
+                           onmouseout="this.style.backgroundColor='var(--color-primary-dark)'">
+                            Read More
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Carousel Item 2 - Template content added back -->
+                <div class="carousel-item bg-white">
+                    <div class="md:w-1/2">
+                        <img src="https://placehold.co/800x500/D1D5DB/2D3748?text=Your+Image+2" alt="Featured News Image 2" class="w-full h-full object-cover">
+                    </div>
+                    <div class="md:w-1/2 p-8 flex flex-col justify-center overflow-y-auto">
+                        <h3 class="text-3xl font-semibold mb-4" style="color: var(--color-primary-dark);">Your Top Story Title 2</h3>
+                        <p class="mb-5" style="color: var(--color-secondary-dark);">Here's the place for the second featured article's summary. Make sure it captures the reader's attention!</p>
+                        <p class="text-sm mb-5" style="color: var(--color-secondary-dark);">Date | By Another Name</p>
+                        <a href="#" class="inline-block py-3 px-6 rounded-full text-white font-semibold shadow-md transition duration-300 ease-in-out self-start"
+                           style="background-color: var(--color-primary-dark); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+                           onmouseover="this.style.backgroundColor='var(--color-button-hover)'"
+                           onmouseout="this.style.backgroundColor='var(--color-primary-dark)'">
+                            Read More
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Carousel Item 3 - Template content added back -->
+                <div class="carousel-item bg-white">
+                    <div class="md:w-1/2">
+                        <img src="https://placehold.co/800x500/D1D5DB/2D3748?text=Your+Image+3" alt="Featured News Image 3" class="w-full h-full object-cover">
+                    </div>
+                    <div class="md:w-1/2 p-8 flex flex-col justify-center overflow-y-auto">
+                        <h3 class="text-3xl font-semibold mb-4" style="color: var(--color-primary-dark);">Your Top Story Title 3</h3>
+                        <p class="mb-5" style="color: var(--color-secondary-dark);">This section is for the third featured article. Describe its main points briefly and entice readers to click.</p>
+                        <p class="text-sm mb-5" style="color: var(--color-secondary-dark);">Date | By A Third Author</p>
+                        <a href="#" class="inline-block py-3 px-6 rounded-full text-white font-semibold shadow-md transition duration-300 ease-in-out self-start"
+                           style="background-color: var(--color-primary-dark); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+                           onmouseover="this.style.backgroundColor='var(--color-button-hover)'"
+                           onmouseout="this.style.backgroundColor='var(--color-primary-dark)'">
+                            Read More
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Carousel Item 4 - Template content added back -->
+                <div class="carousel-item bg-white">
+                    <div class="md:w-1/2">
+                        <img src="https://placehold.co/800x500/D1D5DB/2D3748?text=Your+Image+4" alt="Featured News Image 4" class="w-full h-full object-cover">
+                    </div>
+                    <div class="md:w-1/2 p-8 flex flex-col justify-center overflow-y-auto">
+                        <h3 class="text-3xl font-semibold mb-4" style="color: var(--color-primary-dark);">Your Top Story Title 4</h3>
+                        <p class="mb-5" style="color: var(--color-secondary-dark);">And finally, the fourth top story. Provide a compelling snippet that makes people want to learn more.</p>
+                        <p class="text-sm mb-5" style="color: var(--color-secondary-dark);">Date | By Fourth Writer</p>
+                        <a href="#" class="inline-block py-3 px-6 rounded-full text-white font-semibold shadow-md transition duration-300 ease-in-out self-start"
+                           style="background-color: var(--color-primary-dark); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+                           onmouseover="this.style.backgroundColor='var(--color-button-hover)'"
+                           onmouseout="this.style.backgroundColor='var(--color-primary-dark)'">
+                            Read More
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carousel Navigation Dots -->
+            <div id="carousel-dots" class="flex justify-center mt-6">
+                <!-- Dots will be dynamically added by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Latest News Grid Section -->
+        <section class="mb-16">
+            <h2 class="text-4xl font-bold mb-10 text-center" style="color: var(--color-primary-dark);">Latest Updates</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <article class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                    <img src="https://placehold.co/600x400/D1D5DB/2D3748?text=News+1" alt="News Article Image" class="w-full h-48 object-cover mb-4 rounded-md">
+                    <h4 class="text-xl font-semibold mb-2" style="color: var(--color-primary-dark);">Global Markets React to New Economic Policies</h4>
+                    <p class="text-sm mb-4 flex-grow" style="color: var(--color-secondary-dark);">Analysts are closely watching the impact of recently implemented economic reforms on international trade and investment flows.</p>
+                    <p class="text-xs mb-4" style="color: var(--color-secondary-dark);">July 3, 2025 | By John Smith</p>
+                    <a href="#" class="text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out text-sm font-medium self-start" style="color: var(--color-secondary-dark); hover:color: var(--color-primary-dark);">Continue Reading &rarr;</a>
+                </article>
+
+                <article class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                    <img src="https://placehold.co/600x400/D1D5DB/2D3748?text=News+2" alt="News Article Image" class="w-full h-48 object-cover mb-4 rounded-md">
+                    <h4 class="text-xl font-semibold mb-2" style="color: var(--color-primary-dark);">Advancements in AI Ethics Spark Debate</h4>
+                    <p class="text-sm mb-4 flex-grow" style="color: var(--color-secondary-dark);">The latest developments in artificial intelligence ethics are prompting discussions among policymakers and tech leaders worldwide.</p>
+                    <p class="text-xs mb-4" style="color: var(--color-secondary-dark);">July 2, 2025 | By Emily White</p>
+                    <a href="#" class="text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out text-sm font-medium self-start" style="color: var(--color-secondary-dark); hover:color: var(--color-primary-dark);">Continue Reading &rarr;</a>
+                </article>
+
+                <article class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                    <img src="https://placehold.co/600x400/D1D5DB/2D3748?text=News+3" alt="News Article Image" class="w-full h-48 object-cover mb-4 rounded-md">
+                    <h4 class="text-xl font-semibold mb-2" style="color: var(--color-primary-dark);">Cultural Festival Celebrates Diversity and Heritage</h4>
+                    <p class="text-sm mb-4 flex-grow" style="color: var(--color-secondary-dark);">A vibrant cultural festival showcasing traditions from around the globe concluded with record attendance and widespread acclaim.</p>
+                    <p class="text-xs mb-4" style="color: var(--color-secondary-dark);">July 1, 2025 | By David Green</p>
+                    <a href="#" class="text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out text-sm font-medium self-start" style="color: var(--color-secondary-dark); hover:color: var(--color-primary-dark);">Continue Reading &rarr;</a>
+                </article>
+
+                <article class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                    <img src="https://placehold.co/600x400/D1D5DB/2D3748?text=News+4" alt="News Article Image" class="w-full h-48 object-cover mb-4 rounded-md">
+                    <h4 class="text-xl font-semibold mb-2" style="color: var(--color-primary-dark);">Space Exploration Mission Reveals New Exoplanet</h4>
+                    <p class="text-sm mb-4 flex-grow" style="color: var(--color-secondary-dark);">Astronomers have announced the discovery of a potentially habitable exoplanet, fueling excitement in the scientific community.</p>
+                    <p class="text-xs mb-4" style="color: var(--color-secondary-dark);">June 30, 2025 | By Sarah Lee</p>
+                    <a href="#" class="text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out text-sm font-medium self-start" style="color: var(--color-secondary-dark); hover:color: var(--color-primary-dark);">Continue Reading &rarr;</a>
+                </article>
+
+                <article class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                    <img src="https://placehold.co/600x400/D1D5DB/2D3748?text=News+5" alt="News Article Image" class="w-full h-48 object-cover mb-4 rounded-md">
+                    <h4 class="text-xl font-semibold mb-2" style="color: var(--color-primary-dark);">Innovations in Healthcare Technology Improve Patient Outcomes</h4>
+                    <p class="text-sm mb-4 flex-grow" style="color: var(--color-secondary-dark);">New medical devices and digital health solutions are transforming patient care and accessibility worldwide.</p>
+                    <p class="text-xs mb-4" style="color: var(--color-secondary-dark);">June 29, 2025 | By Michael Brown</p>
+                    <a href="#" class="text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out text-sm font-medium self-start" style="color: var(--color-secondary-dark); hover:color: var(--color-primary-dark);">Continue Reading &rarr;</a>
+                </article>
+
+                <article class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                    <img src="https://placehold.co/600x400/D1D5DB/2D3748?text=News+6" alt="News Article Image" class="w-full h-48 object-cover mb-4 rounded-md">
+                    <h4 class="text-xl font-semibold mb-2" style="color: var(--color-primary-dark);">Climate Change Summit Concludes with Ambitious Pledges</h4>
+                    <p class="text-sm mb-4 flex-grow" style="color: var(--color-secondary-dark);">World leaders have committed to aggressive new targets aimed at combating climate change and promoting environmental sustainability.</p>
+                    <p class="text-xs mb-4" style="color: var(--color-secondary-dark);">June 28, 2025 | By Jessica Taylor</p>
+                    <a href="#" class="text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out text-sm font-medium self-start" style="color: var(--color-secondary-dark); hover:color: var(--color-primary-dark);">Continue Reading &rarr;</a>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Section (Updated to match the new example) -->
+    <footer class="py-12 px-6 md:px-10" style="background-color: var(--color-footer-bg); color: var(--color-footer-text);">
+        <div class="container mx-auto max-w-7xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- Left Section: Logo, Tagline, Description -->
+                <div class="md:col-span-2 flex flex-col items-center md:items-start text-center md:text-left">
+                    <div class="mb-4">
+                        <!-- Removed the img tag for the icon -->
+                        <h4 class="text-2xl font-bold" style="font-family: 'Playfair Display', serif; color: var(--color-footer-text);">Minimal News & Current Affairs</h4>
+                    </div>
+                    <!-- Added a sub-tagline/URL line -->
+                    <p class="text-sm mb-2" style="color: var(--color-footer-text);">
+                        Global Insights | Unbiased Reporting | Your trusted source
+                    </p>
+                    <p class="text-sm" style="color: var(--color-footer-text);">
+                        An initiative by dedicated journalists committed to clarity and truth.
+                    </p>
+                </div>
+
+                <!-- Navigation Columns -->
+                <div class="md:col-span-1 flex flex-col items-center md:items-start">
+                    <h5 class="font-bold text-lg mb-4" style="font-family: 'Lato', sans-serif; color: var(--color-footer-text);">Site Links</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="index.html" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">Home</a></li>
+                        <li><a href="#" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">Essays & Articles</a></li>
+                        <li><a href="#" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">News</a></li>
+                        <li><a href="#" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">Contests</a></li>
+                        <li><a href="#" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">Monthly Journal</a></li>
+                        <li><a href="#" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">Podcasts</a></li>
+                    </ul>
+                </div>
+
+                <div class="md:col-span-1 flex flex-col items-center md:items-start">
+                    <h5 class="font-bold text-lg mb-4" style="font-family: 'Lato', sans-serif; color: var(--color-footer-text);">More Info</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">Events</a></li>
+                        <li><a href="#" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">Courses</a></li>
+                        <li><a href="about.html" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">About Us</a></li>
+                        <li><a href="#" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">Contact Us</a></li>
+                        <li><a href="#" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">Donation</a></li>
+                        <li><a href="#" class="hover:underline" style="color: var(--color-footer-text); hover:color: var(--color-footer-link-hover);">Constitution and Documents</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Separator Line -->
+            <hr class="border-t border-gray-700 my-8">
+
+            <!-- Bottom Section: Copyright and Social Icons -->
+            <div class="flex flex-col md:flex-row justify-between items-center text-sm">
+                <p class="mb-4 md:mb-0" style="color: var(--color-footer-text);">&copy; 2025 Minimal News & Current Affairs. All rights reserved.</p>
+                <div class="flex space-x-4">
+                    <!-- Instagram Icon Placeholder (replace with actual SVG or FontAwesome if loaded) -->
+                    <a href="#" class="hover:text-white transition duration-300 ease-in-out" style="color: var(--color-footer-text);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                    </a>
+                    <!-- LinkedIn Icon Placeholder (replace with actual SVG or FontAwesome if loaded) -->
+                    <a href="#" class="hover:text-white transition duration-300 ease-in-out" style="color: var(--color-footer-text);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Header Scroll Effect and Carousel -->
+    <script>
+        // --- Header Scroll Effect ---
+        const header = document.getElementById('main-header');
+        let lastScrollY = window.scrollY;
+        const headerHeight = header.offsetHeight;
+
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+
+            if (currentScrollY > lastScrollY && currentScrollY > headerHeight) {
+                header.classList.add('-translate-y-full');
+            } else if (currentScrollY < lastScrollY || currentScrollY <= 0) {
+                header.classList.remove('-translate-y-full');
+            }
+            lastScrollY = currentScrollY;
+        });
+
+        // --- Carousel Functionality for Top Stories ---
+        const carouselContainer = document.getElementById('top-stories-carousel');
+        const carouselItems = carouselContainer.querySelectorAll('.carousel-item');
+        const dotsContainer = document.getElementById('carousel-dots');
+        let currentSlide = 0;
+        let slideInterval; // Variable to hold the interval ID
+
+        // Function to show a specific slide and update dots
+        function showSlide(index) {
+            // Hide all slides and remove 'active' class from dots
+            carouselItems.forEach((item, i) => {
+                item.classList.remove('active');
+                if (dotsContainer.children[i]) { // Check if dot exists before trying to access
+                    dotsContainer.children[i].classList.remove('active');
+                }
+            });
+
+            // Show the selected slide and add 'active' class to its dot
+            carouselItems[index].classList.add('active');
+            if (dotsContainer.children[index]) { // Check if dot exists before trying to access
+                dotsContainer.children[index].classList.add('active');
+            }
+            currentSlide = index; // Update the current slide index
+        }
+
+        // Function to move to the next slide
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % carouselItems.length; // Loop back to start if at end
+            showSlide(currentSlide);
+        }
+
+        // Function to start the automatic slide rotation
+        function startSlideShow() {
+            // Clear any existing interval to prevent multiple intervals running
+            clearInterval(slideInterval);
+            // Set a new interval to change slides every 5 seconds (5000 milliseconds)
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+
+        // Initialize dots and set up click listeners
+        function initializeCarousel() {
+            // Create navigation dots dynamically based on the number of carousel items
+            carouselItems.forEach((_, index) => {
+                const dot = document.createElement('span');
+                dot.classList.add('dot');
+                dot.addEventListener('click', () => {
+                    showSlide(index); // Show slide when dot is clicked
+                    startSlideShow(); // Restart slideshow to reset timer
+                });
+                dotsContainer.appendChild(dot);
+            });
+
+            // Show the first slide initially
+            showSlide(currentSlide);
+            // Start the automatic slideshow
+            startSlideShow();
+        }
+
+        // Run the carousel initialization once the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initializeCarousel);
+    </script>
+</body>
+</html>
